@@ -1,0 +1,30 @@
+version: 2.1
+
+jobs:
+  build-apk:
+    docker:
+      - image: cimg/android:2024.11
+    resource_class: large
+    steps:
+      - checkout
+      - run:
+          name: Install Flutter
+          command: |
+            git clone https://github.com/flutter/flutter.git -b stable ~/flutter
+            echo 'export PATH="$HOME/flutter/bin:$PATH"' >> $BASH_ENV
+      - run:
+          name: Accept Android licenses
+          command: yes | sdkmanager --licenses || true
+      - run:
+          name: Get packages
+          command: flutter pub get
+      - run:
+          name: Build APK
+          command: flutter build apk --release
+      - store_artifacts:
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+workflows:
+  build:
+    jobs:
+      - build-apk
